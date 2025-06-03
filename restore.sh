@@ -89,9 +89,23 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-# Check if we're in the chezmoi config directory
-if [[ ! -d ".git" && ! -f "chezmoi.toml" && -z "$(find . -maxdepth 1 -name "*-chezmoi.toml" 2>/dev/null)" ]]; then
-    error_exit "This script should be run from the chezmoi configuration directory. No configuration files found."
+# Change to the script's directory to ensure we're working in the right location
+# This works in bash, zsh, and other shells
+SCRIPT_PATH="${0}"
+if [[ -L "${SCRIPT_PATH}" ]]; then
+    # If the script is a symlink, resolve it
+    SCRIPT_PATH="$(readlink "${SCRIPT_PATH}")"
+fi
+SCRIPT_DIR="$(cd "$(dirname "${SCRIPT_PATH}")" &>/dev/null && pwd)"
+if [ -z "$SCRIPT_DIR" ]; then
+    error_exit "Failed to determine script directory."
+fi
+cd "$SCRIPT_DIR" || error_exit "Failed to change to script directory: $SCRIPT_DIR"
+log_info "Working in directory: $SCRIPT_DIR"
+
+# Verify that configuration files exist in this directory
+if [ -z "$(find . -maxdepth 1 -name "*-chezmoi.toml" 2>/dev/null)" ]; then
+    error_exit "No configuration files (*-chezmoi.toml) found in $SCRIPT_DIR."
 fi
 
 # Check if chezmoi.toml is a symlink
@@ -112,11 +126,6 @@ fi
 
 # Find all *-chezmoi.toml files and sort them alphabetically
 mapfile -t config_files < <(find . -maxdepth 1 -name "*-chezmoi.toml" | sort)
-
-# Check if any configuration files were found
-if [ ${#config_files[@]} -eq 0 ]; then
-    error_exit "No configuration files (*-chezmoi.toml) found."
-fi
 
 # Display the list of configuration files
 log_info "Available configuration files:"
