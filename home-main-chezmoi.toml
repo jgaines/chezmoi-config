@@ -1,0 +1,18 @@
+pager = "less -FRX"
+
+[data]
+email = "me@jgaines.com"
+machine = "home-main"
+
+[diff]
+command = "difft"
+args = ["{{ .Destination }}", "{{ .Target }}"]
+exclude = []
+pager = "less -FRX"
+scriptContents = true
+
+[edit]
+command = "nvim"
+
+[merge]
+command = "meld"
