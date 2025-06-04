@@ -1,0 +1,35 @@
+[data]
+machine = "work-main"              # ,cgezmoi.hostname doesn't work when /etc/hosts is full of crap
+email = "john.gaines@netscout.com"
+
+[diff]
+command = "difft"
+args = [
+  # Difftastic takes two file paths as arguments.
+  # .Destination is the file in your home directory (the "current" state).
+  # .Target is the file in chezmoi's target state (what chezmoi wants it to be).
+  "{{ .Destination }}",
+  "{{ .Target }}",
+  # Optional: Add any difftastic arguments you prefer
+  # "--display=side-by-side",
+  # "--background=dark", # or light
+  # "--tab-width=4",
+  # "--syntax-highlight=on", # or none, some
+]
+# If you run into issues with a pager (like `less`), you might need to set it to `cat`
+# or ensure difftastic handles its own paging or `less` flags correctly.
+# See the note below about pagers.
+pager = "less -FRX"
+
+[merge]
+# command = "meld"
+
+# command = "nvim"
+# args = ["-d", "{{ .Destination }}", "{{ .Source }}", "{{ .Target }}"]
+
+# vscode
+command = "bash"
+args = [
+  "-c",
+  "cp {{ .Target }} {{ .Target }}.base && code --new-window --wait --merge {{ .Destination }} {{ .Target }} {{ .Target }}.base {{ .Source }}",
+]
